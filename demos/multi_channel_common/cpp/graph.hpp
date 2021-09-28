@@ -56,6 +56,7 @@ private:
     std::queue<BatchRequestDesc> busyBatchRequests;
 
     std::size_t maxRequests = 0;
+    std::string perf_hint;
 
     std::atomic_bool terminate = {false};
     std::mutex mtxAvalableRequests;
@@ -84,6 +85,7 @@ public:
         std::string cldnnConfigPath;
         std::string deviceName;
         PostLoadFunc postLoadFunc = nullptr;
+        std::string perf_hint;
     };
 
     explicit IEGraph(const InitParams& p);

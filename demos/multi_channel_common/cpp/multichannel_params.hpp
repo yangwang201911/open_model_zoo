@@ -10,7 +10,12 @@
 
 static const char help_message[] = "Print a usage message";
 static const char input_message[] = "Required. A comma separated list of inputs to process. Each input must be a "
-    "single image, a folder of images or anything that cv::VideoCapture can process.";
+                                    "single image, a folder of images or anything that cv::VideoCapture can process.";
+static const char hint_message[] =
+        "Optional. Performance hint (optimize for latency or throughput). "
+        "The hint allows the OpenVINO device to select the right network-specific settings,"
+        "as opposite to just accepting specific values from the sample command line."
+        "So you can specify only the hint without setting  explicit 'nstreams' or other device-specific options";
 static const char loop_message[] = "Optional. Enable reading the inputs in a loop.";
 static const char duplication_channel_number_message[] = "Optional. Multiply the inputs by the given factor. For "
     "example, if only one input is provided, but -ni is set to 2, the demo uses half of images from the input as it was"
@@ -36,6 +41,7 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", input_message);
+DEFINE_string(hint, "", hint_message);
 DEFINE_bool(loop, false, loop_message);
 DEFINE_uint32(duplicate_num, 1, duplication_channel_number_message);
 DEFINE_string(m, "", model_path_message);
@@ -45,8 +51,8 @@ DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_uint32(bs, 1, batch_size);
-DEFINE_uint32(nireq, 5, num_infer_requests);
-DEFINE_uint32(n_iqs, 5, input_queue_size);
+DEFINE_uint32(nireq, 4, num_infer_requests);
+DEFINE_uint32(n_iqs, 4, input_queue_size);
 DEFINE_uint32(fps_sp, 1000, fps_sampling_period);
 DEFINE_uint32(n_sp, 10, num_sampling_periods);
 DEFINE_bool(show_stats, false, show_statistics);

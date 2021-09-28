@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <ie_plugin_config.hpp>
 
 #include "graph.hpp"
 #include "threading.hpp"
@@ -69,7 +70,8 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     InferenceEngine::ExecutableNetwork network;
-    network = ie.LoadNetwork(cnnNetwork, deviceName);
+    network = ie.LoadNetwork(cnnNetwork, deviceName, {{CONFIG_KEY(PERFORMANCE_HINT), perf_hint},
+                                                      {CONFIG_KEY(PERFORMANCE_HINT_NUM_REQUESTS), std::to_string(maxRequests)}});
 
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
@@ -91,8 +93,8 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     if (postLoad != nullptr)
         postLoad(outputDataBlobNames, cnnNetwork);
 
-    availableRequests.front()->StartAsync();
-    availableRequests.front()->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
+//    availableRequests.front()->StartAsync();
+//    availableRequests.front()->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
 }
 
 void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc) {
@@ -193,7 +195,7 @@ IEGraph::IEGraph(const InitParams& p):
     modelPath(p.modelPath),
     cpuExtensionPath(p.cpuExtPath), cldnnConfigPath(p.cldnnConfigPath),
     printPerfReport(p.reportPerf), deviceName(p.deviceName),
-    maxRequests(p.maxRequests) {
+    maxRequests(p.maxRequests), perf_hint(p.perf_hint) {
     assert(p.maxRequests > 0);
 
     postLoad = p.postLoadFunc;
