@@ -7,6 +7,8 @@
 #include <utility>
 
 #include "output.hpp"
+typedef std::chrono::high_resolution_clock Time;
+typedef std::chrono::nanoseconds ns;
 
 AsyncOutput::AsyncOutput(bool collectStats, size_t queueSize,
                          DrawFunc drawFunc):

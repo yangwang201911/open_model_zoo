@@ -34,6 +34,7 @@
 #include "output.hpp"
 #include "threading.hpp"
 #include "graph.hpp"
+std::string duration_ms;
 
 namespace {
 
@@ -200,8 +201,12 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
     drawStats();
 
     char str[256];
-    snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
+    snprintf(str, sizeof(str), "Device: %s", FLAGS_d.c_str());
     cv::putText(windowImage, str, cv::Point(800, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
+    snprintf(str, sizeof(str), "Load time: %s ms", duration_ms.c_str());
+    cv::putText(windowImage, str, cv::Point(800, 170), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
+    snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
+    cv::putText(windowImage, str, cv::Point(800, 250), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 0, 255), 2);
     cv::imshow(params.name, windowImage);
 }
 
@@ -238,6 +243,12 @@ int main(int argc, char* argv[]) {
         graphParams.cpuExtPath      = FLAGS_l;
         graphParams.cldnnConfigPath = FLAGS_c;
         graphParams.deviceName      = FLAGS_d;
+        if (!FLAGS_hint.empty() && (FLAGS_hint == "throughput" ||  FLAGS_hint == "tput" || FLAGS_hint == "latency")) {
+            if (FLAGS_hint == "throughput" || FLAGS_hint == "tput")
+                graphParams.perf_hint = CONFIG_VALUE(THROUGHPUT);
+            else if (FLAGS_hint == "latency")
+                graphParams.perf_hint = CONFIG_VALUE(LATENCY);
+        }
 
         std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
         auto inputDims = network->getInputDims();
