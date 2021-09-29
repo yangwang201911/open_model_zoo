@@ -42,6 +42,7 @@ void loadImgToIEGraph(const cv::Mat& img, size_t batch, void* ieBuffer) {
 typedef std::chrono::high_resolution_clock Time;
 typedef std::chrono::nanoseconds ns;
 extern std::string duration_ms;
+extern std::string hint;
 
 void IEGraph::initNetwork(const std::string& deviceName) {
     auto cnnNetwork = ie.ReadNetwork(modelPath);
@@ -88,6 +89,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         return std::chrono::duration_cast<ns>(Time::now() - startTime).count() * 0.000001;
     };
     duration_ms = double_to_string(get_total_ms_time(startTime));
+    hint = perf_hint;
     slog::info << "Load network took " << duration_ms << " ms" << slog::endl;
 
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());

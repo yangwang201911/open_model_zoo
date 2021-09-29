@@ -35,6 +35,7 @@
 #include "threading.hpp"
 #include "graph.hpp"
 std::string duration_ms;
+std::string hint;
 
 namespace {
 
@@ -207,6 +208,12 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
     cv::putText(windowImage, str, cv::Point(800, 170), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
     snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
     cv::putText(windowImage, str, cv::Point(800, 250), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 0, 255), 2);
+    if (!hint.empty()) {
+        snprintf(str, sizeof(str), "Performance Hint %s", hint.c_str());
+        cv::putText(windowImage, str, cv::Point(800, 320), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,
+                    cv::Scalar(0, 0, 255), 2);
+    }
+
     cv::imshow(params.name, windowImage);
 }
 
