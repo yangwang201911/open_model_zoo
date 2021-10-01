@@ -204,8 +204,11 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
     char str[256];
     snprintf(str, sizeof(str), "Device: %s", FLAGS_d.c_str());
     cv::putText(windowImage, str, cv::Point(800, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
-    snprintf(str, sizeof(str), "Load time: %s ms", duration_ms.c_str());
-    cv::putText(windowImage, str, cv::Point(800, 170), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
+    if (hint.empty()) {
+        snprintf(str, sizeof(str), "Load time: %s ms", duration_ms.c_str());
+        cv::putText(windowImage, str, cv::Point(800, 170), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,
+                    cv::Scalar(0, 255, 0), 2);
+    }
     snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
     cv::putText(windowImage, str, cv::Point(800, 250), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 0, 255), 2);
     if (!hint.empty()) {
