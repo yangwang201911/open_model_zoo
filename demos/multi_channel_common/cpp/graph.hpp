@@ -107,6 +107,7 @@ public:
     struct Stats {
         float preprocessTime;
         float inferTime;
+        float firstinferTime;
     };
 
     Stats getStats() const;

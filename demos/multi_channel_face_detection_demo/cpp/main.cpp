@@ -157,7 +157,8 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      float time,
                      const std::string& stats,
                      DisplayParams params,
-                     Presenter& presenter) {
+                     Presenter& presenter,
+					 float firstInfduration = 0.0) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data[i];
@@ -204,16 +205,19 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
     char str[256];
     snprintf(str, sizeof(str), "Device: %s", FLAGS_d.c_str());
     cv::putText(windowImage, str, cv::Point(800, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
-    if (hint.empty()) {
+    //if (hint.empty()) {
         snprintf(str, sizeof(str), "Load time: %s ms", duration_ms.c_str());
         cv::putText(windowImage, str, cv::Point(800, 170), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,
                     cv::Scalar(0, 255, 0), 2);
-    }
+        snprintf(str, sizeof(str), "First Inference time: %5.2f ms", std::stof(duration_ms) + firstInfduration);
+        cv::putText(windowImage, str, cv::Point(800, 250), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,
+                    cv::Scalar(0, 255, 0), 2);
+    //}
     snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
-    cv::putText(windowImage, str, cv::Point(800, 250), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 0, 255), 2);
+    cv::putText(windowImage, str, cv::Point(800, 320), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 0, 255), 2);
     if (!hint.empty()) {
         snprintf(str, sizeof(str), "Performance Hint %s", hint.c_str());
-        cv::putText(windowImage, str, cv::Point(800, 320), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,
+        cv::putText(windowImage, str, cv::Point(800, 390), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,
                     cv::Scalar(0, 0, 255), 2);
     }
 
@@ -323,6 +327,7 @@ int main(int argc, char* argv[]) {
         network->setDetectionConfidence(static_cast<float>(FLAGS_t));
 
         std::atomic<float> averageFps = {0.0f};
+        std::atomic<float> firstInfduration = {0.0f};
 
         std::vector<std::shared_ptr<VideoFrame>> batchRes;
 
@@ -346,7 +351,7 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources(result, averageFps, str, params, presenter);
+            displayNSources(result, averageFps, str, params, presenter,firstInfduration);
             int key = cv::waitKey(1);
             presenter.handleKey(key);
 
@@ -394,6 +399,7 @@ int main(int argc, char* argv[]) {
 
             auto currTime = timer::now();
             auto deltaTime = (currTime - lastTime);
+
             if (deltaTime >= samplingTimeout) {
                 auto durMsec =
                         std::chrono::duration_cast<duration>(deltaTime).count();
@@ -407,14 +413,19 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 } else {
-                    averageFps = frameTime;
+					
+                    //averageFps = frameTime;
+                    averageFps = frameTime / FLAGS_duplicate_num;
                 }
 
                 if (FLAGS_show_stats) {
                     auto inputStat = sources.getStats();
                     auto inferStat = network->getStats();
                     auto outputStat = output.getStats();
-
+		            if(firstInfduration == 0.0)
+			        {
+				        firstInfduration = inferStat.firstinferTime;
+	                }
                     std::unique_lock<std::mutex> lock(statMutex);
                     statStream.str(std::string());
                     statStream << std::fixed << std::setprecision(1);
@@ -435,7 +446,9 @@ int main(int argc, char* argv[]) {
                     statStream << "Plugin latency: "
                                << inferStat.inferTime << "ms";
                     statStream << std::endl;
-
+                    statStream << "Plugin first inference latency: "
+                               << inferStat.firstinferTime << "ms";
+                    statStream << std::endl;
                     statStream << "Render time: " << outputStat.renderTime
                                << "ms" << std::endl;
 

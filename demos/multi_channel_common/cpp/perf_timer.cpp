@@ -16,3 +16,7 @@ float PerfTimer::getValue() const {
 bool PerfTimer::enabled() const {
     return maxCount > 0;
 }
+
+float PerfTimer::getFirstValue() const {
+    return firstValue;
+}

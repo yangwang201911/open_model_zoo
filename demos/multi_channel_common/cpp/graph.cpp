@@ -311,7 +311,7 @@ IEGraph::~IEGraph() {
 }
 
 IEGraph::Stats IEGraph::getStats() const {
-    return Stats{perfTimerPreprocess.getValue(), perfTimerInfer.getValue()};
+    return Stats{perfTimerPreprocess.getValue(), perfTimerInfer.getValue(), perfTimerInfer.getFirstValue() };
 }
 
 void IEGraph::printPerformanceCounts(std::string fullDeviceName) {
