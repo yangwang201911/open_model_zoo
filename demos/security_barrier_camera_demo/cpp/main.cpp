@@ -767,9 +767,10 @@ int main(int argc, char* argv[]) {
         for (const std::string& file : files) {
             cv::Mat frame = cv::imread(file, cv::IMREAD_COLOR);
             if (frame.empty()) {
+                errno = 0;
                 cv::VideoCapture videoCapture(file);
                 if (!videoCapture.isOpened()) {
-                    slog::info << "Cannot open " << file << slog::endl;
+                    slog::info << "Cannot open " << file << ": " << strerror(errno) << slog::endl;
                     return 1;
                 }
                 videoCapturSourcess.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
